@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -22,19 +23,19 @@ type CreateUserParams struct {
 	Password  string `json:"password"`
 }
 
-func (c *CreateUserParams) Validation() []string {
-	var errors []string
+func (c *CreateUserParams) Validation() map[string]string {
+	errors := map[string]string{}
 	if len(c.FirstName) < minFirstNameLenght {
-		errors = append(errors, fmt.Sprintf("FirstName length must be greater then %d.", minFirstNameLenght))
+		errors["firstName"] = fmt.Sprintf("FirstName length must be greater then %d.", minFirstNameLenght)
 	}
 	if len(c.LastName) < minLastNameLenght {
-		errors = append(errors, fmt.Sprintf("LastName length must be greater then %d.", minLastNameLenght))
+		errors["lastName"] = fmt.Sprintf("LastName length must be greater then %d.", minLastNameLenght)
 	}
 	if len(c.Password) < minPasswordLenght {
-		errors = append(errors, fmt.Sprintf("Password length must be greater then %d.", minPasswordLenght))
+		errors["password"] = fmt.Sprintf("Password length must be greater then %d.", minPasswordLenght)
 	}
 	if !IsValidEmail(c.Email) {
-		errors = append(errors, "Email is InValid!")
+		errors["email"] = "Email is InValid!"
 	}
 	return errors
 }
@@ -42,6 +43,22 @@ func (c *CreateUserParams) Validation() []string {
 func IsValidEmail(email string) bool {
 	var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 	return emailRegex.MatchString(email)
+}
+
+type UpdateUserParams struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+func (u *UpdateUserParams) ToBson() bson.M {
+	m := bson.M{}
+	if len(u.FirstName) > 0 {
+		m["firstName"] = u.FirstName
+	}
+	if len(u.LastName) > 0 {
+		m["lastName"] = u.LastName
+	}
+	return m
 }
 
 type User struct {

@@ -14,9 +14,7 @@ import (
 )
 
 const (
-	dbUrl           = "mongodb://localhost:27017"
-	dbName          = "hotel-reservation"
-	userCollections = "users"
+	dbUrl = "mongodb://localhost:27017"
 )
 
 var errorConfig = fiber.Config{
@@ -45,6 +43,8 @@ func main() {
 	apiv1.Get("/users", userHandler.HandleGetUsers)
 	apiv1.Get("/users/:id", userHandler.HandleGetUser)
 	apiv1.Post("/users", userHandler.HandlePostUser)
+	apiv1.Delete("/users/:id", userHandler.HandleDeleteUser)
+	apiv1.Put("/users/:id", userHandler.HandleUpdateUser)
 
 	app.Listen(*listenAddr)
 }
