@@ -18,12 +18,12 @@ type HotelStore interface {
 	Drop(ctx context.Context) error
 }
 
-type mongoHotelStore struct {
+type MongoHotelStore struct {
 	client *mongo.Client
 	coll   *mongo.Collection
 }
 
-func (m *mongoHotelStore) GetHotelByID(ctx context.Context, id string) (*types.Hotel, error) {
+func (m *MongoHotelStore) GetHotelByID(ctx context.Context, id string) (*types.Hotel, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -37,8 +37,8 @@ func (m *mongoHotelStore) GetHotelByID(ctx context.Context, id string) (*types.H
 	return &hotel, nil
 }
 
-func (m *mongoHotelStore) GetHotel(ctx context.Context) ([]*types.Hotel, error) {
-	filter := bson.M{"_id": ""}
+func (m *MongoHotelStore) GetHotel(ctx context.Context) ([]*types.Hotel, error) {
+	filter := bson.M{}
 	cur, err := m.coll.Find(ctx, filter)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (m *mongoHotelStore) GetHotel(ctx context.Context) ([]*types.Hotel, error) 
 	return hotels, nil
 }
 
-func (m *mongoHotelStore) DeleteHotel(ctx context.Context, id string) error {
+func (m *MongoHotelStore) DeleteHotel(ctx context.Context, id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func (m *mongoHotelStore) DeleteHotel(ctx context.Context, id string) error {
 	return nil
 }
 
-func (m *mongoHotelStore) UpdateHotel(ctx context.Context, filter bson.M, update bson.M) error {
+func (m *MongoHotelStore) UpdateHotel(ctx context.Context, filter bson.M, update bson.M) error {
 	_, err := m.coll.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
@@ -70,7 +70,7 @@ func (m *mongoHotelStore) UpdateHotel(ctx context.Context, filter bson.M, update
 	return nil
 }
 
-func (m *mongoHotelStore) InsertHotel(ctx context.Context, hotel *types.Hotel) (*types.Hotel, error) {
+func (m *MongoHotelStore) InsertHotel(ctx context.Context, hotel *types.Hotel) (*types.Hotel, error) {
 	res, err := m.coll.InsertOne(ctx, hotel)
 	if err != nil {
 		return nil, err
@@ -79,12 +79,12 @@ func (m *mongoHotelStore) InsertHotel(ctx context.Context, hotel *types.Hotel) (
 	return hotel, nil
 }
 
-func (m *mongoHotelStore) Drop(ctx context.Context) error {
+func (m *MongoHotelStore) Drop(ctx context.Context) error {
 	return m.coll.Drop(ctx)
 }
 
-func NewMongoHotelStore(DBNAME string, client *mongo.Client) *mongoHotelStore {
-	return &mongoHotelStore{
+func NewMongoHotelStore(DBNAME string, client *mongo.Client) *MongoHotelStore {
+	return &MongoHotelStore{
 		client: client,
 		coll:   client.Database(DBNAME).Collection("hotels"),
 	}

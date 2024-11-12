@@ -18,14 +18,14 @@ type RoomStore interface {
 	Drop(ctx context.Context) error
 }
 
-type mongoRoomStore struct {
+type MongoRoomStore struct {
 	client *mongo.Client
 	coll   *mongo.Collection
 
 	hotelstore HotelStore
 }
 
-func (m *mongoRoomStore) GetRoomByID(ctx context.Context, id string) (*types.Room, error) {
+func (m *MongoRoomStore) GetRoomByID(ctx context.Context, id string) (*types.Room, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (m *mongoRoomStore) GetRoomByID(ctx context.Context, id string) (*types.Roo
 	return &room, nil
 }
 
-func (m *mongoRoomStore) GetRoom(ctx context.Context) ([]*types.Room, error) {
+func (m *MongoRoomStore) GetRoom(ctx context.Context) ([]*types.Room, error) {
 	filter := bson.M{"_id": ""}
 	cur, err := m.coll.Find(ctx, filter)
 	if err != nil {
@@ -52,7 +52,7 @@ func (m *mongoRoomStore) GetRoom(ctx context.Context) ([]*types.Room, error) {
 	return rooms, nil
 }
 
-func (m *mongoRoomStore) DeleteRoom(ctx context.Context, id string) error {
+func (m *MongoRoomStore) DeleteRoom(ctx context.Context, id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func (m *mongoRoomStore) DeleteRoom(ctx context.Context, id string) error {
 	return nil
 }
 
-func (m *mongoRoomStore) UpdateRoom(ctx context.Context, filter bson.M, update bson.M) error {
+func (m *MongoRoomStore) UpdateRoom(ctx context.Context, filter bson.M, update bson.M) error {
 	_, err := m.coll.UpdateOne(ctx, filter, bson.M{"$set": update})
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func (m *mongoRoomStore) UpdateRoom(ctx context.Context, filter bson.M, update b
 	return nil
 }
 
-func (m *mongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*types.Room, error) {
+func (m *MongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*types.Room, error) {
 	result, err := m.coll.InsertOne(ctx, room)
 	if err != nil {
 		return nil, err
@@ -82,12 +82,12 @@ func (m *mongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*typ
 	return room, nil
 }
 
-func (m *mongoRoomStore) Drop(ctx context.Context) error {
+func (m *MongoRoomStore) Drop(ctx context.Context) error {
 	return m.coll.Drop(ctx)
 }
 
-func NewMongoRoomStore(DBNAME string, client *mongo.Client, hotelStore HotelStore) *mongoRoomStore {
-	return &mongoRoomStore{
+func NewMongoRoomStore(DBNAME string, client *mongo.Client, hotelStore HotelStore) *MongoRoomStore {
+	return &MongoRoomStore{
 		client:     client,
 		coll:       client.Database(DBNAME).Collection("rooms"),
 		hotelstore: hotelStore,

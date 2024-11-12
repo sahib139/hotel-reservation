@@ -11,24 +11,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func main() {
-	fmt.Println("Performing seeding...!")
-	defer fmt.Println("Seeding Done!")
+var (
+	client     *mongo.Client
+	hotelStore *db.MongoHotelStore
+	roomStore  *db.MongoRoomStore
+)
 
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBUrl))
-	if err != nil {
-		panic(err)
-	}
-
-	hotelStore := db.NewMongoHotelStore(db.DBNAME, client)
-	roomStore := db.NewMongoRoomStore(db.DBNAME, client, hotelStore)
-
-	hotelStore.Drop(context.Background())
-	roomStore.Drop(context.Background())
-
+func seedHotel(hotelName string, location string, rating int) {
 	hotel := &types.Hotel{
-		Name:     "The Hotel",
-		Location: "New York",
+		Name:     hotelName,
+		Location: location,
+		Rating:   rating,
 		Room:     []primitive.ObjectID{},
 	}
 	insertedHostel, err := hotelStore.InsertHotel(context.Background(), hotel)
@@ -60,5 +53,30 @@ func main() {
 		}
 		fmt.Printf("Inserted Room: %+v\n", room)
 	}
+}
 
+func main() {
+	fmt.Println("Performing seeding...!")
+	defer fmt.Println("Seeding Done!")
+
+	// Create Hotels
+	seedHotel("spark", "Mumbai", 4)
+	seedHotel("current", "Delhi", 3)
+	seedHotel("Arrow", "Gurugram", 5)
+	seedHotel("Sunami", "Pune", 1)
+	seedHotel("Technolo", "Surat", 2)
+}
+
+func init() {
+	var err error
+	client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBUrl))
+	if err != nil {
+		panic(err)
+	}
+
+	hotelStore = db.NewMongoHotelStore(db.DBNAME, client)
+	roomStore = db.NewMongoRoomStore(db.DBNAME, client, hotelStore)
+
+	hotelStore.Drop(context.Background())
+	roomStore.Drop(context.Background())
 }
