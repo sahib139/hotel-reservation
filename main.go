@@ -13,10 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const (
-	dbUrl = "mongodb://localhost:27017"
-)
-
 var errorConfig = fiber.Config{
 	ErrorHandler: func(ctx *fiber.Ctx, err error) error {
 		if err != nil {
@@ -27,7 +23,7 @@ var errorConfig = fiber.Config{
 }
 
 func main() {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dbUrl))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBUrl))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,7 +34,7 @@ func main() {
 	app := fiber.New(errorConfig)
 	apiv1 := app.Group("/api/v1")
 
-	userHandler := api.NewUserHandler(db.NewMongoDBStore(client))
+	userHandler := api.NewUserHandler(db.NewMongoDBStore(db.DBNAME, client))
 
 	apiv1.Get("/users", userHandler.HandleGetUsers)
 	apiv1.Get("/users/:id", userHandler.HandleGetUser)

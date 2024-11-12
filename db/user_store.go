@@ -19,6 +19,7 @@ type UserStore interface {
 	InsertUser(ctx context.Context, user *types.User) (*types.User, error)
 	DeleteUser(ctx context.Context, id string) error
 	UpdateUser(ctx context.Context, filter bson.M, update bson.M) error
+	Drop(ctx context.Context) error
 }
 
 type mongoDbStore struct {
@@ -104,7 +105,11 @@ func (m *mongoDbStore) UpdateUser(ctx context.Context, filter bson.M, update bso
 	return nil
 }
 
-func NewMongoDBStore(client *mongo.Client) *mongoDbStore {
+func (m *mongoDbStore) Drop(ctx context.Context) error {
+	return m.coll.Drop(ctx)
+}
+
+func NewMongoDBStore(DBNAME string, client *mongo.Client) *mongoDbStore {
 	return &mongoDbStore{
 		client: client,
 		coll:   client.Database(DBNAME).Collection(userCollections),
