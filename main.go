@@ -31,11 +31,18 @@ func main() {
 	listenAddr := flag.String("listenAddr", ":5000", "The listen address of the API server")
 	flag.Parse()
 
-	app := fiber.New(errorConfig)
-	apiv1 := app.Group("/api/v1")
+	var (
+		app   = fiber.New(errorConfig)
+		apiv1 = app.Group("/api/v1")
 
-	userHandler := api.NewUserHandler(db.NewMongoDBStore(db.DBNAME, client))
+		// Handler's initialization
+		store = db.NewDbStore(client)
 
+		userHandler  = api.NewUserHandler(store)
+		hotelHandler = api.NewHotelHandler(store)
+	)
+
+	// User endpoints
 	apiv1.Get("/users", userHandler.HandleGetUsers)
 	apiv1.Get("/users/:id", userHandler.HandleGetUser)
 	apiv1.Post("/users", userHandler.HandlePostUser)

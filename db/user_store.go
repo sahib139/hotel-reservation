@@ -22,12 +22,12 @@ type UserStore interface {
 	Drop(ctx context.Context) error
 }
 
-type mongoDbStore struct {
+type MongoUserStore struct {
 	client *mongo.Client
 	coll   *mongo.Collection
 }
 
-func (m *mongoDbStore) InsertUser(ctx context.Context, user *types.User) (*types.User, error) {
+func (m *MongoUserStore) InsertUser(ctx context.Context, user *types.User) (*types.User, error) {
 	insertedUser, err := m.coll.InsertOne(ctx, user)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (m *mongoDbStore) InsertUser(ctx context.Context, user *types.User) (*types
 	return user, nil
 }
 
-func (m *mongoDbStore) DeleteUser(ctx context.Context, id string) error {
+func (m *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (m *mongoDbStore) DeleteUser(ctx context.Context, id string) error {
 	return nil
 }
 
-func (m *mongoDbStore) GetUserByID(ctx context.Context, id string) (*types.User, error) {
+func (m *MongoUserStore) GetUserByID(ctx context.Context, id string) (*types.User, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (m *mongoDbStore) GetUserByID(ctx context.Context, id string) (*types.User,
 	return &user, nil
 }
 
-func (m *mongoDbStore) GetUsers(ctx context.Context) ([]*types.User, error) {
+func (m *MongoUserStore) GetUsers(ctx context.Context) ([]*types.User, error) {
 
 	filter := bson.M{}
 	cur, err := m.coll.Find(ctx, filter)
@@ -92,7 +92,7 @@ func (m *mongoDbStore) GetUsers(ctx context.Context) ([]*types.User, error) {
 	return users, nil
 }
 
-func (m *mongoDbStore) UpdateUser(ctx context.Context, filter bson.M, update bson.M) error {
+func (m *MongoUserStore) UpdateUser(ctx context.Context, filter bson.M, update bson.M) error {
 	oid, err := primitive.ObjectIDFromHex(filter["_id"].(string))
 	if err != nil {
 		return err
@@ -105,12 +105,12 @@ func (m *mongoDbStore) UpdateUser(ctx context.Context, filter bson.M, update bso
 	return nil
 }
 
-func (m *mongoDbStore) Drop(ctx context.Context) error {
+func (m *MongoUserStore) Drop(ctx context.Context) error {
 	return m.coll.Drop(ctx)
 }
 
-func NewMongoDBStore(DBNAME string, client *mongo.Client) *mongoDbStore {
-	return &mongoDbStore{
+func NewMongoUserStore(DBNAME string, client *mongo.Client) *MongoUserStore {
+	return &MongoUserStore{
 		client: client,
 		coll:   client.Database(DBNAME).Collection(userCollections),
 	}

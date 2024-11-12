@@ -14,21 +14,33 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func NewTestUserHandler(userStore db.UserStore) *UserHandler {
+func NewTestUserHandler(store *db.DbStore) *UserHandler {
 	return &UserHandler{
-		UserStore: userStore,
+		store: store,
+	}
+}
+
+func NewTestStore(client *mongo.Client, userStore db.UserStore, hotelStore db.HotelStore, roomStore db.RoomStore) *db.DbStore {
+	return &db.DbStore{
+		Client:     client,
+		UserStore:  userStore,
+		HotelStore: hotelStore,
+		RoomStore:  roomStore,
 	}
 }
 
 func CreateTestUserHandler() *UserHandler {
 	client, _ := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBUrl))
-	userStore := db.NewMongoDBStore(db.TestDb, client)
-	return NewTestUserHandler(userStore)
+	userStore := db.NewMongoUserStore(db.TestDb, client)
+	hotelStore := db.NewMongoHotelStore(db.TestDb, client)
+	roomStore := db.NewMongoRoomStore(db.TestDb, client, hotelStore)
+	store := NewTestStore(client, userStore, hotelStore, roomStore)
+	return NewTestUserHandler(store)
 }
 
 func TestUserPostRequest(t *testing.T) {
 	testUserHandler := CreateTestUserHandler()
-	defer testUserHandler.UserStore.Drop(context.Background())
+	defer testUserHandler.store.UserStore.Drop(context.Background())
 
 	api := fiber.New()
 	api.Post("/", testUserHandler.HandlePostUser)
@@ -56,7 +68,7 @@ func TestUserPostRequest(t *testing.T) {
 
 	insetUser, _ := types.NewUserFromParams(user)
 
-	createdUser, _ := testUserHandler.UserStore.InsertUser(context.Background(), insetUser)
+	createdUser, _ := testUserHandler.store.UserStore.InsertUser(context.Background(), insetUser)
 
 	if createdUser.ID.IsZero() {
 		t.Error("Expected user ID, got", createdUser.ID)

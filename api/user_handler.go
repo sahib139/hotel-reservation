@@ -8,12 +8,12 @@ import (
 )
 
 type UserHandler struct {
-	UserStore db.UserStore
+	store *db.DbStore
 }
 
-func NewUserHandler(userStore db.UserStore) *UserHandler {
+func NewUserHandler(store *db.DbStore) *UserHandler {
 	return &UserHandler{
-		UserStore: userStore,
+		store: store,
 	}
 }
 
@@ -21,7 +21,7 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 	var (
 		id = c.Params("id")
 	)
-	user, err := h.UserStore.GetUserByID(c.Context(), id)
+	user, err := h.store.UserStore.GetUserByID(c.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	if err != nil {
 		return nil
 	}
-	insertedUser, err := h.UserStore.InsertUser(c.Context(), user)
+	insertedUser, err := h.store.UserStore.InsertUser(c.Context(), user)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 
-	users, err := h.UserStore.GetUsers(c.Context())
+	users, err := h.store.UserStore.GetUsers(c.Context())
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func (h *UserHandler) HandleDeleteUser(c *fiber.Ctx) error {
 	var (
 		id = c.Params("id")
 	)
-	err := h.UserStore.DeleteUser(c.Context(), id)
+	err := h.store.UserStore.DeleteUser(c.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (h *UserHandler) HandleUpdateUser(c *fiber.Ctx) error {
 		return err
 	}
 	updates := params.ToBson()
-	err := h.UserStore.UpdateUser(c.Context(), bson.M{"_id": id}, updates)
+	err := h.store.UserStore.UpdateUser(c.Context(), bson.M{"_id": id}, updates)
 	if err != nil {
 		return err
 	}
