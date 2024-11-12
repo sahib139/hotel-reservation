@@ -49,5 +49,10 @@ func main() {
 	apiv1.Delete("/users/:id", userHandler.HandleDeleteUser)
 	apiv1.Put("/users/:id", userHandler.HandleUpdateUser)
 
+	// Hotel endpoints
+	apiv1.Get("/hotels", hotelHandler.HandlerGetHotels)
+	apiv1.Get("/hotels/:id", hotelHandler.HandlerGetHotel)
+	apiv1.Get("/hotels/:id/rooms", hotelHandler.HandlerGetRoom)
+
 	app.Listen(*listenAddr)
 }

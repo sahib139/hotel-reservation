@@ -11,7 +11,7 @@ import (
 
 type RoomStore interface {
 	GetRoomByID(ctx context.Context, id string) (*types.Room, error)
-	GetRoom(ctx context.Context) ([]*types.Room, error)
+	GetRoom(ctx context.Context, filter bson.M) ([]*types.Room, error)
 	InsertRoom(ctx context.Context, room *types.Room) (*types.Room, error)
 	DeleteRoom(ctx context.Context, id string) error
 	UpdateRoom(ctx context.Context, filter bson.M, update bson.M) error
@@ -39,8 +39,7 @@ func (m *MongoRoomStore) GetRoomByID(ctx context.Context, id string) (*types.Roo
 	return &room, nil
 }
 
-func (m *MongoRoomStore) GetRoom(ctx context.Context) ([]*types.Room, error) {
-	filter := bson.M{"_id": ""}
+func (m *MongoRoomStore) GetRoom(ctx context.Context, filter bson.M) ([]*types.Room, error) {
 	cur, err := m.coll.Find(ctx, filter)
 	if err != nil {
 		return nil, err
