@@ -15,6 +15,7 @@ const (
 
 type UserStore interface {
 	GetUserByID(ctx context.Context, id string) (*types.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*types.User, error)
 	GetUsers(ctx context.Context) ([]*types.User, error)
 	InsertUser(ctx context.Context, user *types.User) (*types.User, error)
 	DeleteUser(ctx context.Context, id string) error
@@ -57,6 +58,18 @@ func (m *MongoUserStore) GetUserByID(ctx context.Context, id string) (*types.Use
 
 	var user types.User
 	err = m.coll.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (m *MongoUserStore) GetUserByEmail(ctx context.Context, email string) (*types.User, error) {
+
+	filter := bson.M{"email": email}
+
+	var user types.User
+	err := m.coll.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
