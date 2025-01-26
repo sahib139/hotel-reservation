@@ -13,6 +13,7 @@ type DbStore struct {
 	UserStore  UserStore
 	HotelStore HotelStore
 	RoomStore  RoomStore
+	BookStore  BookStore
 }
 
 func NewDbStore(client *mongo.Client) *DbStore {
@@ -22,5 +23,6 @@ func NewDbStore(client *mongo.Client) *DbStore {
 		UserStore:  NewMongoUserStore(DBNAME, client),
 		HotelStore: hotelStore,
 		RoomStore:  NewMongoRoomStore(DBNAME, client, hotelStore),
+		BookStore:  NewMongoBookStore(client),
 	}
 }
